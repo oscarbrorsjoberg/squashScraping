@@ -1,15 +1,17 @@
 # Sqash center web scraper
 
-This short document takes out a serie from 
-the squash competition and creates google-calander events 
-for he given team.
 
-## Dependecies 
+A small web scraper, which takes in game info given a team and the url to the teams division.
+With the game info google calender events are created. 
 
-Please se the provided .yml file for the conda enviroment.
+The following page was used : [squash divison](http://www.squashcenter.se/lagsquash/division-7/)
 
-## Warnings 
+## Dependencies
 
-This code was written for the author, code is highly specific.
+Please see the provided .yml file for the conda enviroment.
+
+## Background
+Code was written on a rainy Sunday to learn some webscraping.
+
 
 
