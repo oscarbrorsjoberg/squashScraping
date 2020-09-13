@@ -6,10 +6,25 @@ import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+import scrapeSC as sc
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar.events'] # read/write access to events
 
+month = { 
+    'jan' : '01',
+    'feb' : '02',
+    'mar' : '03',
+    'apr' : '04',
+    'maj' : '05',
+    'jun' : '06',
+    'jul' : '07',
+    'aug' : '08',
+    'sep' : '09',
+    'okt' : '10',
+    'nov' : '11',
+    'dec' : '12',
+}
 
 def create_service():
     """Shows basic usage of the Google Calendar API.
@@ -50,7 +65,7 @@ def write_upcoming_events(nrEventsMax, service):
     # Call the Calendar API
 
     now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    print('Getting the upcoming 10 events')
+    print('Getting the upcoming %i events'% nrEventsMax)
 
     events_result = service.events().list(calendarId='primary',
                                         timeMin=now,
@@ -66,41 +81,57 @@ def write_upcoming_events(nrEventsMax, service):
         start = event['start'].get('dateTime', event['start'].get('date'))
         print(start, event['summary'])
 
-def create_event(service):
-    event = {
-        'summary': 'Google I/O 2015',
-        'location': '800 Howard St., San Francisco, CA 94103',
-        'description': 'A chance to hear more about Google\'s developer products.',
+def create_event(match, team):
+
+    comp_info = "" 
+    for pl in team["players"]:
+        info = team["players"][pl]
+        comp_info +=  'name : ' + pl + '\n'
+        comp_info += 'phone : ' + info["phone"] + '\n'
+        comp_info += 'mail : ' + info["mail"] + '\n'
+
+    start = '2020-' + month[match['date'][1]] + '-'+ match['date'][0] + 'T20:00:00+02:00'
+    end = '2020-' + month[match['date'][1]] + '-' + match['date'][0] + 'T21:30:00+02:00'
+
+    eventDict = {
+        'summary': 'Game against : ' + team["teamName"],
+        'location': 'Platensgatan 8, 582 20 Linköping',
+        'description':  match["teams"][0] + ' vs. '+  match["teams"][1] +'\n'
+        + 'Teaminfo: \n'
+        + comp_info + '\n',
+
         'start': {
-            'dateTime': '2020-10-28T09:00:00-07:00',
-            'timeZone': 'America/Los_Angeles',
-            },
+            'dateTime': start,
+            'timeZone': 'GMT+2:00'
+        },
         'end': {
-            'dateTime': '2020-10-28T17:00:00-07:00',
-            'timeZone': 'America/Los_Angeles',
-            },
+            'dateTime': end,
+            'timeZone': 'GMT+2:00'
+        },
         'recurrence': [
-            'RRULE:FREQ=DAILY;COUNT=2'
-            ],
+            'RRULE:FREQ=DAILY;COUNT=1'
+        ],
         'attendees': [
-            {'email': 'lpage@example.com'},
-            {'email': 'sbrin@example.com'},
-            ],
+            {'email': 'skantedal@gmail.com'},
+        ],
         'reminders': {
-            'useDefault': False,
-            'overrides': [
-                {'method': 'email', 'minutes': 24 * 60},
-                {'method': 'popup', 'minutes': 10},
-                ],
-            },
-        }
-    event = service.events().insert(calendarId='primary', body=event).execute()
-    print 'Event created: %s' % (event.get('htmlLink'))
+            'useDefault': True,
+        },
+    }
+
+
+    return eventDict
+
+
 
 def main():
     service = create_service()
-    create_event(service)
-    write_upcoming_events(1, service)
+    moi, toi = sc.get_all_matches_for_team()
+    for i, m in enumerate(moi):
+        event =  create_event(m, toi[i])
+        t = service.events().insert(calendarId='primary', body=event).execute()
+
+    write_upcoming_events(10, service)
 
 if __name__ == '__main__':
     main()
