@@ -66,9 +66,40 @@ def write_upcoming_events(nrEventsMax, service):
         start = event['start'].get('dateTime', event['start'].get('date'))
         print(start, event['summary'])
 
+def create_event(service):
+    event = {
+        'summary': 'Google I/O 2015',
+        'location': '800 Howard St., San Francisco, CA 94103',
+        'description': 'A chance to hear more about Google\'s developer products.',
+        'start': {
+            'dateTime': '2020-10-28T09:00:00-07:00',
+            'timeZone': 'America/Los_Angeles',
+            },
+        'end': {
+            'dateTime': '2020-10-28T17:00:00-07:00',
+            'timeZone': 'America/Los_Angeles',
+            },
+        'recurrence': [
+            'RRULE:FREQ=DAILY;COUNT=2'
+            ],
+        'attendees': [
+            {'email': 'lpage@example.com'},
+            {'email': 'sbrin@example.com'},
+            ],
+        'reminders': {
+            'useDefault': False,
+            'overrides': [
+                {'method': 'email', 'minutes': 24 * 60},
+                {'method': 'popup', 'minutes': 10},
+                ],
+            },
+        }
+    event = service.events().insert(calendarId='primary', body=event).execute()
+    print 'Event created: %s' % (event.get('htmlLink'))
 
 def main():
     service = create_service()
+    create_event(service)
     write_upcoming_events(1, service)
 
 if __name__ == '__main__':

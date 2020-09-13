@@ -33,3 +33,14 @@ for row in rows:
             print("Empty element")
     if(rn):
         print("This is a row  : ", rn)
+
+
+class team:
+
+
+class game:
+
+
+
+def game_to_event(game):
+    
